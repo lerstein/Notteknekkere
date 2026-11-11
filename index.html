@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nøtteknekker-samlingen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#9b1c22; --red-d:#6f1015; --green:#1f4d3a; --gold:#c9993a;
+    --cream:#fbf6ec; --card:#ffffff; --ink:#2a1d17; --muted:#7a6a5f; --line:#eadfcd;
+    --ok:#2f7a4b; --warn:#b36b00;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--cream);color:var(--ink);
+    background-image:radial-gradient(circle at 10% 0%,#f3e6cf 0,transparent 40%),radial-gradient(circle at 100% 30%,#f6e9d4 0,transparent 35%)}
+  header{background:var(--red);color:#fff;padding:18px 16px 0;box-shadow:0 2px 0 var(--gold)}
+  .wrap{max-width:960px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand svg{width:44px;height:56px;flex:none}
+  h1{font-family:Fraunces,serif;font-weight:800;font-size:clamp(22px,5vw,32px);margin:0;letter-spacing:.2px}
+  .sub{opacity:.85;font-size:14px;margin-top:2px}
+  nav{display:flex;gap:4px;margin-top:14px;overflow-x:auto}
+  nav a{color:#fff;text-decoration:none;padding:10px 14px;border-radius:10px 10px 0 0;font-weight:600;font-size:15px;white-space:nowrap;opacity:.8}
+  nav a.active{background:var(--cream);color:var(--red);opacity:1}
+  main{padding:18px 16px 60px}
+  .banner{padding:10px 14px;border-radius:10px;margin-bottom:14px;font-size:14px}
+  .banner.demo{background:#fff4d6;border:1px solid #ecd28a}
+  .banner.gift{background:#e8f1ec;border:1px solid #bcd6c6}
+  .banner.err{background:#fde8e8;border:1px solid #f0b7b7}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  input,textarea,select{font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:100%}
+  input:focus,textarea:focus,select:focus{outline:2px solid var(--gold);border-color:transparent}
+  .toolbar input{flex:1;min-width:180px}
+  .toolbar select{width:auto}
+  .count{color:var(--muted);font-size:14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .12s, box-shadow .12s;display:flex;flex-direction:column}
+  .card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(80,40,10,.1)}
+  .ph{aspect-ratio:1/1;background:#f4ead9;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .ph img{width:100%;height:100%;object-fit:cover}
+  .ph svg{width:42%;opacity:.35}
+  .card .body{padding:10px 12px 12px}
+  .card h3{margin:0;font-size:15px;line-height:1.25}
+  .meta{color:var(--muted);font-size:13px;margin-top:4px}
+  .tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:#efe3cf;color:#6b4b1f;margin-top:6px}
+  .tag.gift{background:#dcebe2;color:var(--green)}
+  .empty{text-align:center;color:var(--muted);padding:40px 10px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+  .panel h2{font-family:Fraunces,serif;font-size:20px;margin:0 0 10px;color:var(--red-d)}
+  label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:520px){.row{grid-template-columns:1fr}}
+  .btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:11px 16px;cursor:pointer;background:var(--red);color:#fff}
+  .btn:hover{background:var(--red-d)}
+  .btn.sec{background:#efe3cf;color:var(--ink)}
+  .btn.green{background:var(--green)}
+  .btn.small{padding:7px 10px;font-size:13px}
+  .btn:disabled{opacity:.5;cursor:default}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .matches{margin-top:8px}
+  .match{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;background:#fff6e5;border:1px solid #f0d9a8;margin-top:6px;font-size:14px}
+  .match img,.match .mph{width:44px;height:44px;border-radius:8px;object-fit:cover;background:#f4ead9;flex:none}
+  .ok{color:var(--ok);font-weight:600}
+  .list{display:flex;flex-direction:column;gap:8px}
+  .li{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px}
+  .li img,.li .mph{width:52px;height:52px;border-radius:8px;object-fit:cover;background:#f4ead9;flex:none}
+  .li .txt{flex:1;min-width:0}
+  .li .txt b{display:block;overflow:hidden;text-overflow:ellipsis}
+  .li .btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .photo-prev{margin-top:8px;display:flex;align-items:center;gap:10px}
+  .photo-prev img{width:80px;height:80px;object-fit:cover;border-radius:10px}
+  .modal{position:fixed;inset:0;background:rgba(30,15,10,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+  .modal.open{display:flex}
+  .modal .box{background:#fff;border-radius:16px;max-width:460px;width:100%;max-height:90vh;overflow:auto}
+  .modal .box img{width:100%;display:block}
+  .modal .box .in{padding:16px}
+  .modal h3{font-family:Fraunces,serif;margin:0 0 6px;font-size:22px}
+  .dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px;margin-top:10px}
+  .dl dt{color:var(--muted)}
+  .dl dd{margin:0}
+  footer{text-align:center;font-size:12px;color:var(--muted);padding:20px}
+  footer a{color:var(--muted)}
+  .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+  .toast.show{opacity:1}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <!-- Generic toy-soldier nutcracker icon -->
+      <svg viewBox="0 0 44 56" aria-hidden="true">
+        <rect x="13" y="2" width="18" height="12" rx="2" fill="#1b1b1b"/>
+        <rect x="12" y="12" width="20" height="3" fill="#c9993a"/>
+        <rect x="14" y="15" width="16" height="12" rx="3" fill="#f2d3b3"/>
+        <circle cx="19" cy="20" r="1.3" fill="#222"/><circle cx="25" cy="20" r="1.3" fill="#222"/>
+        <rect x="16" y="24" width="12" height="5" rx="1" fill="#fff"/>
+        <rect x="18" y="25.5" width="8" height="1.2" fill="#555"/>
+        <rect x="12" y="29" width="20" height="14" rx="2" fill="#1f4d3a"/>
+        <rect x="21" y="29" width="2" height="14" fill="#c9993a"/>
+        <rect x="14" y="43" width="7" height="10" fill="#fff"/><rect x="23" y="43" width="7" height="10" fill="#fff"/>
+        <rect x="13" y="51" width="8" height="3" fill="#1b1b1b"/><rect x="23" y="51" width="8" height="3" fill="#1b1b1b"/>
+      </svg>
+      <div>
+        <h1>Nøtteknekker-samlingen</h1>
+        <div class="sub">Sjekk her før du kjøper – så slipper vi doble 😄</div>
+      </div>
+    </div>
+    <nav>
+      <a href="#samling" data-view="samling">Samlingen</a>
+      <a href="#gave" data-view="gave">Jeg kjøper gave</a>
+      <a href="#admin" data-view="admin" class="hidden" id="navAdmin">Admin</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="demoBanner" class="banner demo hidden">Demo-modus: ingen server koblet til ennå. Data lagres bare i denne nettleseren. Sett <code>API_URL</code> i index.html.</div>
+  <div id="errBanner" class="banner err hidden"></div>
+
+  <!-- COLLECTION -->
+  <section id="view-samling">
+    <div class="toolbar">
+      <input id="q" type="search" placeholder="Søk: farge, figur, høyde, merke …">
+      <select id="sort">
+        <option value="name">Navn A–Å</option>
+        <option value="new">Nyeste først</option>
+        <option value="height">Høyde</option>
+      </select>
+    </div>
+    <div class="count" id="count"></div>
+    <div class="grid" id="grid" style="margin-top:10px"></div>
+  </section>
+
+  <!-- GIFT -->
+  <section id="view-gave" class="hidden">
+    <div class="banner gift">🙈 <b>Gavesiden.</b> Her registrerer du det du har kjøpt, så ingen andre kjøper den samme. (Samleren bør kanskje ikke titte her …)</div>
+
+    <div class="panel">
+      <h2>1. Sjekk først</h2>
+      <input id="gq" type="search" placeholder="Beskriv den du vurderer, f.eks. «konge rød» eller «Steinbach»">
+      <div id="gqRes" class="matches"></div>
+    </div>
+
+    <div class="panel">
+      <h2>2. Registrer at du har kjøpt en</h2>
+      <form id="giftForm" autocomplete="off">
+        <label>Hva slags nøtteknekker? *</label>
+        <input name="name" required maxlength="120" placeholder="F.eks. Konge med blå kappe">
+        <div id="dupWarn" class="matches"></div>
+        <label>Kjennetegn</label>
+        <textarea name="details" rows="2" maxlength="500" placeholder="Farger, hva den holder, materiale …"></textarea>
+        <div class="row">
+          <div><label>Høyde (cm)</label><input name="height" inputmode="decimal" maxlength="10"></div>
+          <div><label>Butikk / merke</label><input name="shop" maxlength="120"></div>
+        </div>
+        <div class="row">
+          <div><label>Ditt navn *</label><input name="buyer" required maxlength="80"></div>
+          <div><label>Anledning</label><input name="occasion" maxlength="80" placeholder="Jul 2026, bursdag …"></div>
+        </div>
+        <label>Bilde (valgfritt, gjør det lettere for andre)</label>
+        <input type="file" accept="image/*" id="giftPhoto">
+        <div class="photo-prev hidden" id="giftPrev"><img alt=""><button type="button" class="btn sec small" data-clear="gift">Fjern bilde</button></div>
+        <div class="actions"><button class="btn green" type="submit">Registrer kjøpet</button></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>Allerede kjøpt som gave</h2>
+      <div id="giftList" class="list"></div>
+    </div>
+  </section>
+
+  <!-- ADMIN -->
+  <section id="view-admin" class="hidden">
+    <div class="panel" id="loginPanel">
+      <h2>Logg inn</h2>
+      <form id="loginForm">
+        <label>Passord</label>
+        <input type="password" id="pw" autocomplete="current-password">
+        <div class="actions"><button class="btn" type="submit">Logg inn</button></div>
+      </form>
+    </div>
+
+    <div id="adminArea" class="hidden">
+      <div class="panel">
+        <h2 id="itemFormTitle">Legg til i samlingen</h2>
+        <form id="itemForm" autocomplete="off">
+          <input type="hidden" name="id">
+          <label>Navn *</label>
+          <input name="name" required maxlength="120" placeholder="F.eks. Soldat med trommer">
+          <label>Kjennetegn</label>
+          <textarea name="details" rows="2" maxlength="500"></textarea>
+          <div class="row">
+            <div><label>Høyde (cm)</label><input name="height" inputmode="decimal" maxlength="10"></div>
+            <div><label>Produsent / merke</label><input name="maker" maxlength="120"></div>
+          </div>
+          <label>Hvor/hvem fra</label>
+          <input name="origin" maxlength="200" placeholder="Kjøpt i Dresden 2019, gave fra mamma …">
+          <label>Bilde</label>
+          <input type="file" accept="image/*" id="itemPhoto">
+          <div class="photo-prev hidden" id="itemPrev"><img alt=""><button type="button" class="btn sec small" data-clear="item">Fjern bilde</button></div>
+          <div class="actions">
+            <button class="btn" type="submit" id="itemSubmit">Lagre</button>
+            <button class="btn sec hidden" type="button" id="itemCancel">Avbryt redigering</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>Gaver som er registrert</h2>
+        <div id="adminGifts" class="list"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Hele samlingen</h2>
+        <div id="adminItems" class="list"></div>
+      </div>
+
+      <div class="actions"><button class="btn sec" id="logout">Logg ut</button></div>
+    </div>
+  </section>
+</main>
+
+<footer><a href="#admin">Admin</a></footer>
+
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================== CONFIG ================== */
+// Paste your Apps Script Web app URL here (ends with /exec). Empty = demo mode.
+const API_URL = "";
+/* ============================================ */
+
+const DEMO = !API_URL;
+const state = { items: [], gifts: [], loaded: false };
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const PH_SVG = '<svg viewBox="0 0 44 56"><rect x="13" y="2" width="18" height="12" rx="2" fill="#6b4b1f"/><rect x="14" y="15" width="16" height="12" rx="3" fill="#6b4b1f"/><rect x="12" y="29" width="20" height="14" rx="2" fill="#6b4b1f"/><rect x="14" y="43" width="7" height="10" fill="#6b4b1f"/><rect x="23" y="43" width="7" height="10" fill="#6b4b1f"/></svg>';
+
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 2600);
+}
+function showErr(msg) {
+  const b = $("#errBanner");
+  if (!msg) return b.classList.add("hidden");
+  b.textContent = msg; b.classList.remove("hidden");
+}
+
+/* ---------- storage helpers (may be unavailable) ---------- */
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  sget(k) { try { return sessionStorage.getItem(k); } catch { return null; } },
+  sset(k, v) { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch {} }
+};
+
+/* ---------- API (real or demo) ---------- */
+async function apiGet() {
+  if (DEMO) return demo.get();
+  const r = await fetch(API_URL, { cache: "no-store" });
+  return r.json();
+}
+async function apiPost(body) {
+  if (DEMO) return demo.post(body);
+  // text/plain body = "simple request", avoids CORS preflight against Apps Script
+  const r = await fetch(API_URL, { method: "POST", body: JSON.stringify(body) });
+  return r.json();
+}
+
+const demo = {
+  PW: "demo",
+  db() { return store.get("nk_demo", { items: [], gifts: [] }); },
+  save(d) { store.set("nk_demo", d); },
+  uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); },
+  get() {
+    const d = this.db();
+    return { ok: true, items: d.items, gifts: d.gifts.map(({ token, ...g }) => g) };
+  },
+  post(b) {
+    const d = this.db(), admin = b.password === this.PW, now = new Date().toISOString();
+    const fail = e => ({ ok: false, error: e });
+    switch (b.action) {
+      case "checkPassword": return { ok: admin, error: admin ? "" : "Feil passord (demo: «demo»)" };
+      case "addGift": {
+        const g = { ...b.gift, id: this.uid(), token: this.uid(), added: now };
+        if (!g.name || !g.buyer) return fail("Mangler felt");
+        d.gifts.push(g); this.save(d); return { ok: true, id: g.id, token: g.token };
+      }
+      case "deleteGift": {
+        const g = d.gifts.find(x => x.id === b.id);
+        if (!g) return fail("Fant ikke");
+        if (!admin && g.token !== b.token) return fail("Ikke tilgang");
+        d.gifts = d.gifts.filter(x => x.id !== b.id); this.save(d); return { ok: true };
+      }
+      case "saveItem": {
+        if (!admin) return fail("Feil passord");
+        const it = { ...b.item };
+        const i = d.items.findIndex(x => x.id === it.id);
+        if (i >= 0) { it.added = d.items[i].added; if (b.keepPhoto) it.photo = d.items[i].photo; d.items[i] = it; }
+        else { it.id = this.uid(); it.added = now; d.items.push(it); }
+        this.save(d); return { ok: true, id: it.id };
+      }
+      case "deleteItem": {
+        if (!admin) return fail("Feil passord");
+        d.items = d.items.filter(x => x.id !== b.id); this.save(d); return { ok: true };
+      }
+      case "receiveGift": {
+        if (!admin) return fail("Feil passord");
+        const g = d.gifts.find(x => x.id === b.id); if (!g) return fail("Fant ikke");
+        d.items.push({ id: this.uid(), name: g.name, details: g.details, height: g.height,
+          maker: g.shop ? "Kjøpt hos " + g.shop : "", origin: "Gave fra " + g.buyer + (g.occasion ? " (" + g.occasion + ")" : ""),
+          photo: g.photo, added: now });
+        d.gifts = d.gifts.filter(x => x.id !== b.id); this.save(d); return { ok: true };
+      }
+    }
+    return fail("Ukjent handling");
+  }
+};
+
+async function load() {
+  try {
+    const res = await apiGet();
+    if (!res.ok) throw new Error(res.error || "Ukjent feil");
+    state.items = res.items || [];
+    state.gifts = res.gifts || [];
+    state.loaded = true;
+    showErr("");
+  } catch (e) {
+    showErr("Fikk ikke hentet lista: " + e.message + ". Prøv å laste siden på nytt.");
+  }
+  renderAll();
+}
+
+/* ---------- search ---------- */
+const norm = s => String(s ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+function matches(obj, q) {
+  const hay = norm([obj.name, obj.details, obj.height, obj.maker, obj.origin, obj.shop].join(" "));
+  return norm(q).split(/\s+/).filter(Boolean).every(w => hay.includes(w));
+}
+// looser: any word ≥3 chars hits (for duplicate warnings)
+function similar(obj, q) {
+  const hay = norm([obj.name, obj.details, obj.maker, obj.shop].join(" "));
+  const words = norm(q).split(/\s+/).filter(w => w.length >= 3);
+  return words.length && words.some(w => hay.includes(w));
+}
+
+/* ---------- rendering ---------- */
+function thumb(photo, cls = "mph") {
+  return photo ? `<img src="${esc(photo)}" alt="" loading="lazy">` : `<div class="${cls}"></div>`;
+}
+
+function renderGrid() {
+  const q = $("#q").value.trim();
+  let list = state.items.filter(i => !q || matches(i, q));
+  const s = $("#sort").value;
+  list.sort((a, b) =>
+    s === "new" ? String(b.added).localeCompare(String(a.added)) :
+    s === "height" ? (parseFloat(b.height) || 0) - (parseFloat(a.height) || 0) :
+    a.name.localeCompare(b.name, "no"));
+  const total = state.items.length;
+  $("#count").textContent = !state.loaded ? "Laster …" :
+    q ? `${list.length} av ${total} treff` : `${total} nøtteknekkere i samlingen`;
+  $("#grid").innerHTML = list.length ? list.map(i => `
+    <div class="card" data-id="${esc(i.id)}">
+      <div class="ph">${i.photo ? `<img src="${esc(i.photo)}" alt="" loading="lazy">` : PH_SVG}</div>
+      <div class="body">
+        <h3>${esc(i.name)}</h3>
+        <div class="meta">${[i.height && esc(i.height) + " cm", esc(i.maker)].filter(Boolean).join(" · ")}</div>
+      </div>
+    </div>`).join("") :
+    `<div class="empty" style="grid-column:1/-1">${state.loaded ? (q ? "Ingen treff – den har vi kanskje ikke! 🎉" : "Samlingen er tom ennå.") : ""}</div>`;
+}
+
+function renderGiftSearch() {
+  const q = $("#gq").value.trim();
+  const box = $("#gqRes");
+  if (!q) return box.innerHTML = "";
+  const hitsI = state.items.filter(i => matches(i, q));
+  const hitsG = state.gifts.filter(g => matches(g, q));
+  if (!hitsI.length && !hitsG.length) return box.innerHTML = `<p class="ok">✓ Ingen treff på «${esc(q)}» – ser ut som en trygg idé.</p>`;
+  box.innerHTML =
+    hitsI.map(i => `<div class="match">${thumb(i.photo)}<div><b>${esc(i.name)}</b><br><span class="meta">Finnes i samlingen${i.height ? " · " + esc(i.height) + " cm" : ""}</span></div></div>`).join("") +
+    hitsG.map(g => `<div class="match">${thumb(g.photo)}<div><b>${esc(g.name)}</b><br><span class="meta">Allerede kjøpt som gave av ${esc(g.buyer)}</span></div></div>`).join("");
+}
+
+function renderDupWarn() {
+  const q = document.querySelector("#giftForm [name=name]").value.trim();
+  const box = $("#dupWarn");
+  if (q.length < 3) return box.innerHTML = "";
+  const hits = [...state.items.map(i => ({ ...i, _k: "i" })), ...state.gifts.map(g => ({ ...g, _k: "g" }))]
+    .filter(x => similar(x, q)).slice(0, 4);
+  box.innerHTML = hits.length ? `<div class="meta" style="margin-top:6px">Ligner på noe vi har – sjekk at det ikke er samme:</div>` +
+    hits.map(x => `<div class="match">${thumb(x.photo)}<div><b>${esc(x.name)}</b><br><span class="meta">${x._k === "i" ? "I samlingen" : "Gave fra " + esc(x.buyer)}</span></div></div>`).join("") : "";
+}
+
+function renderGiftList() {
+  const mine = store.get("nk_mine", {});
+  const list = [...state.gifts].sort((a, b) => String(b.added).localeCompare(String(a.added)));
+  $("#giftList").innerHTML = list.length ? list.map(g => `
+    <div class="li">${thumb(g.photo)}
+      <div class="txt"><b>${esc(g.name)}</b>
+        <span class="meta">Kjøpt av ${esc(g.buyer)}${g.occasion ? " · " + esc(g.occasion) : ""}${g.height ? " · " + esc(g.height) + " cm" : ""}</span></div>
+      ${mine[g.id] ? `<div class="btns"><button class="btn sec small" data-undo="${esc(g.id)}">Angre</button></div>` : ""}
+    </div>`).join("") : `<div class="empty">Ingen gaver registrert ennå.</div>`;
+}
+
+function renderAdmin() {
+  const admin = !!store.sget("nk_pw");
+  $("#loginPanel").classList.toggle("hidden", admin);
+  $("#adminArea").classList.toggle("hidden", !admin);
+  $("#navAdmin").classList.toggle("hidden", !admin);
+  if (!admin) return;
+  $("#adminGifts").innerHTML = state.gifts.length ? state.gifts.map(g => `
+    <div class="li">${thumb(g.photo)}
+      <div class="txt"><b>${esc(g.name)}</b><span class="meta">Fra ${esc(g.buyer)}${g.occasion ? " · " + esc(g.occasion) : ""}</span></div>
+      <div class="btns">
+        <button class="btn green small" data-receive="${esc(g.id)}">Mottatt → samlingen</button>
+        <button class="btn sec small" data-delgift="${esc(g.id)}">Slett</button>
+      </div>
+    </div>`).join("") : `<div class="empty">Ingen registrerte gaver.</div>`;
+  const items = [...state.items].sort((a, b) => a.name.localeCompare(b.name, "no"));
+  $("#adminItems").innerHTML = items.length ? items.map(i => `
+    <div class="li">${thumb(i.photo)}
+      <div class="txt"><b>${esc(i.name)}</b><span class="meta">${[i.height && esc(i.height) + " cm", esc(i.maker), esc(i.origin)].filter(Boolean).join(" · ")}</span></div>
+      <div class="btns">
+        <button class="btn sec small" data-edit="${esc(i.id)}">Rediger</button>
+        <button class="btn sec small" data-delitem="${esc(i.id)}">Slett</button>
+      </div>
+    </div>`).join("") : `<div class="empty">Ingen ennå – legg til den første over.</div>`;
+}
+
+function renderAll() { renderGrid(); renderGiftSearch(); renderDupWarn(); renderGiftList(); renderAdmin(); }
+
+/* ---------- views ---------- */
+function route() {
+  const v = (location.hash || "#samling").slice(1);
+  const view = ["samling", "gave", "admin"].includes(v) ? v : "samling";
+  ["samling", "gave", "admin"].forEach(n => $("#view-" + n).classList.toggle("hidden", n !== view));
+  document.querySelectorAll("nav a").forEach(a => a.classList.toggle("active", a.dataset.view === view));
+  if (view === "admin") $("#navAdmin").classList.remove("hidden");
+}
+window.addEventListener("hashchange", route);
+
+/* ---------- modal & confirm ---------- */
+function openModal(html) { $("#modalBox").innerHTML = html; $("#modal").classList.add("open"); }
+function closeModal() { $("#modal").classList.remove("open"); }
+$("#modal").addEventListener("click", e => { if (e.target.id === "modal" || e.target.dataset.close != null) closeModal(); });
+
+function ask(text, okLabel = "Ja") {
+  return new Promise(res => {
+    openModal(`<div class="in"><p style="margin-top:0">${esc(text)}</p>
+      <div class="actions"><button class="btn" id="askOk">${esc(okLabel)}</button><button class="btn sec" id="askNo">Avbryt</button></div></div>`);
+    $("#askOk").onclick = () => { closeModal(); res(true); };
+    $("#askNo").onclick = () => { closeModal(); res(false); };
+  });
+}
+
+$("#grid").addEventListener("click", e => {
+  const c = e.target.closest(".card"); if (!c) return;
+  const i = state.items.find(x => x.id === c.dataset.id); if (!i) return;
+  const rows = [["Høyde", i.height && i.height + " cm"], ["Produsent", i.maker], ["Fra", i.origin], ["Kjennetegn", i.details]]
+    .filter(r => r[1]).map(r => `<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join("");
+  openModal(`${i.photo ? `<img src="${esc(i.photo)}" alt="">` : ""}
+    <div class="in"><h3>${esc(i.name)}</h3><dl class="dl">${rows}</dl>
+    <div class="actions"><button class="btn sec" data-close>Lukk</button></div></div>`);
+});
+
+/* ---------- photos: shrink to fit in one sheet cell ---------- */
+const photos = { gift: "", item: "", itemKeep: false };
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      let size = 360, q = 0.72, out = "";
+      const c = document.createElement("canvas"), ctx = c.getContext("2d");
+      for (let n = 0; n < 8; n++) {
+        const s = Math.min(1, size / Math.max(img.width, img.height));
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        out = c.toDataURL("image/jpeg", q);
+        if (out.length < 45000) break;
+        size = Math.round(size * 0.82); q = Math.max(0.45, q - 0.07);
+      }
+      URL.revokeObjectURL(url);
+      out.length < 48000 ? resolve(out) : reject(new Error("Bildet ble for stort"));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Kunne ikke lese bildet")); };
+    img.src = url;
+  });
+}
+function bindPhoto(inputSel, prevSel, key) {
+  $(inputSel).addEventListener("change", async e => {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      photos[key] = await compressImage(f);
+      if (key === "item") photos.itemKeep = false;
+      $(prevSel).querySelector("img").src = photos[key];
+      $(prevSel).classList.remove("hidden");
+    } catch (err) { toast(err.message); }
+  });
+}
+bindPhoto("#giftPhoto", "#giftPrev", "gift");
+bindPhoto("#itemPhoto", "#itemPrev", "item");
+document.addEventListener("click", e => {
+  const k = e.target.dataset.clear; if (!k) return;
+  photos[k] = ""; if (k === "item") photos.itemKeep = false;
+  $("#" + k + "Photo").value = ""; $("#" + k + "Prev").classList.add("hidden");
+});
+
+/* ---------- gift form ---------- */
+$("#gq").addEventListener("input", renderGiftSearch);
+document.querySelector("#giftForm [name=name]").addEventListener("input", renderDupWarn);
+// remember buyer name for next time
+const buyerInput = document.querySelector("#giftForm [name=buyer]");
+buyerInput.value = store.get("nk_buyer", "");
+
+$("#giftForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = e.target, btn = f.querySelector("button[type=submit]");
+  const gift = Object.fromEntries(new FormData(f));
+  gift.photo = photos.gift;
+  btn.disabled = true; btn.textContent = "Lagrer …";
+  try {
+    const res = await apiPost({ action: "addGift", gift });
+    if (!res.ok) throw new Error(res.error);
+    const mine = store.get("nk_mine", {}); mine[res.id] = res.token; store.set("nk_mine", mine);
+    store.set("nk_buyer", gift.buyer);
+    f.reset(); buyerInput.value = gift.buyer;
+    photos.gift = ""; $("#giftPrev").classList.add("hidden");
+    toast("Registrert – takk! 🎁");
+    await load();
+  } catch (err) { toast("Feil: " + err.message); }
+  btn.disabled = false; btn.textContent = "Registrer kjøpet";
+});
+
+$("#giftList").addEventListener("click", async e => {
+  const id = e.target.dataset.undo; if (!id) return;
+  if (!await ask("Fjerne registreringen din?", "Fjern")) return;
+  const mine = store.get("nk_mine", {});
+  const res = await apiPost({ action: "deleteGift", id, token: mine[id] });
+  if (!res.ok) return toast("Feil: " + res.error);
+  delete mine[id]; store.set("nk_mine", mine);
+  toast("Fjernet"); load();
+});
+
+/* ---------- admin ---------- */
+$("#loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const pw = $("#pw").value;
+  const res = await apiPost({ action: "checkPassword", password: pw }).catch(() => ({ ok: false, error: "Nettverksfeil" }));
+  if (!res.ok) return toast(res.error || "Feil passord");
+  store.sset("nk_pw", pw); $("#pw").value = ""; renderAdmin(); toast("Logget inn");
+});
+$("#logout").addEventListener("click", () => { store.sset("nk_pw", null); renderAdmin(); location.hash = "#samling"; });
+
+function resetItemForm() {
+  const f = $("#itemForm"); f.reset(); f.elements["id"].value = "";
+  photos.item = ""; photos.itemKeep = false; $("#itemPrev").classList.add("hidden");
+  $("#itemFormTitle").textContent = "Legg til i samlingen";
+  $("#itemCancel").classList.add("hidden");
+}
+$("#itemCancel").addEventListener("click", resetItemForm);
+
+$("#itemForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = e.target, btn = $("#itemSubmit");
+  const item = Object.fromEntries(new FormData(f));
+  item.photo = photos.item;
+  btn.disabled = true; btn.textContent = "Lagrer …";
+  try {
+    const res = await apiPost({ action: "saveItem", item, keepPhoto: photos.itemKeep, password: store.sget("nk_pw") });
+    if (!res.ok) throw new Error(res.error);
+    toast(item.id ? "Oppdatert" : "Lagt til 🎉");
+    resetItemForm(); await load();
+  } catch (err) { toast("Feil: " + err.message); }
+  btn.disabled = false; btn.textContent = "Lagre";
+});
+
+document.addEventListener("click", async e => {
+  const d = e.target.dataset, pw = store.sget("nk_pw");
+  if (d.edit) {
+    const i = state.items.find(x => x.id === d.edit); if (!i) return;
+    const f = $("#itemForm");
+    ["id", "name", "details", "height", "maker", "origin"].forEach(k => f.elements[k].value = i[k] || "");
+    photos.item = i.photo || ""; photos.itemKeep = !!i.photo;
+    $("#itemPrev").classList.toggle("hidden", !i.photo);
+    if (i.photo) $("#itemPrev img").src = i.photo;
+    $("#itemFormTitle").textContent = "Rediger: " + i.name;
+    $("#itemCancel").classList.remove("hidden");
+    f.scrollIntoView({ behavior: "smooth" });
+  } else if (d.delitem) {
+    const i = state.items.find(x => x.id === d.delitem);
+    if (!await ask(`Slette «${i?.name}» fra samlingen?`, "Slett")) return;
+    const res = await apiPost({ action: "deleteItem", id: d.delitem, password: pw });
+    res.ok ? (toast("Slettet"), load()) : toast("Feil: " + res.error);
+  } else if (d.receive) {
+    const res = await apiPost({ action: "receiveGift", id: d.receive, password: pw });
+    res.ok ? (toast("Flyttet til samlingen 🎄"), load()) : toast("Feil: " + res.error);
+  } else if (d.delgift) {
+    if (!await ask("Slette denne gaveregistreringen?", "Slett")) return;
+    const res = await apiPost({ action: "deleteGift", id: d.delgift, password: pw });
+    res.ok ? (toast("Slettet"), load()) : toast("Feil: " + res.error);
+  }
+});
+
+/* ---------- start ---------- */
+$("#q").addEventListener("input", renderGrid);
+$("#sort").addEventListener("change", renderGrid);
+if (DEMO) $("#demoBanner").classList.remove("hidden");
+route();
+renderAll();
+load();
+</script>
+</body>
+</html>
