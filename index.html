@@ -181,6 +181,7 @@
       <form id="loginForm">
         <label>Passord</label>
         <input type="password" id="pw" autocomplete="current-password">
+        <div id="pwMsg" class="meta" style="color:#9b1c22;margin-top:6px"></div>
         <div class="actions"><button class="btn" type="submit">Logg inn</button></div>
       </form>
     </div>
@@ -555,8 +556,10 @@ $("#giftList").addEventListener("click", async e => {
 $("#loginForm").addEventListener("submit", async e => {
   e.preventDefault();
   const pw = $("#pw").value;
+  $("#pwMsg").textContent = "Sjekker …";
   const res = await apiPost({ action: "checkPassword", password: pw }).catch(() => ({ ok: false, error: "Nettverksfeil" }));
-  if (!res.ok) return toast(res.error || "Feil passord");
+  if (!res.ok) { $("#pwMsg").textContent = res.error || "Feil passord"; return; }
+  $("#pwMsg").textContent = "";
   store.sset("nk_pw", pw); $("#pw").value = ""; renderAdmin(); toast("Logget inn");
 });
 $("#logout").addEventListener("click", () => { store.sset("nk_pw", null); renderAdmin(); location.hash = "#samling"; });
