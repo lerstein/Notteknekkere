@@ -69,6 +69,8 @@
   .li .txt{flex:1;min-width:0}
   .li .txt b{display:block;overflow:hidden;text-overflow:ellipsis}
   .li .btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .photo-btns{display:flex;gap:8px;flex-wrap:wrap}
+  .photo-btns label.btn{display:inline-block;margin:0;font-size:14px;padding:10px 14px}
   .photo-prev{margin-top:8px;display:flex;align-items:center;gap:10px}
   .photo-prev img{width:80px;height:80px;object-fit:cover;border-radius:10px}
   .modal{position:fixed;inset:0;background:rgba(30,15,10,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
@@ -162,7 +164,10 @@
           <div><label>Anledning</label><input name="occasion" maxlength="80" placeholder="Jul 2026, bursdag …"></div>
         </div>
         <label>Bilde (valgfritt, gjør det lettere for andre)</label>
-        <input type="file" accept="image/*" id="giftPhoto">
+        <div class="photo-btns">
+          <label class="btn sec small"><input type="file" accept="image/*" capture="environment" id="giftCam" hidden>📷 Ta bilde</label>
+          <label class="btn sec small"><input type="file" accept="image/*" id="giftPhoto" hidden>🖼️ Velg fra bilder</label>
+        </div>
         <div class="photo-prev hidden" id="giftPrev"><img alt=""><button type="button" class="btn sec small" data-clear="gift">Fjern bilde</button></div>
         <div class="actions"><button class="btn green" type="submit">Registrer kjøpet</button></div>
       </form>
@@ -202,7 +207,10 @@
           <label>Hvor/hvem fra</label>
           <input name="origin" maxlength="200" placeholder="Kjøpt i Dresden 2019, gave fra mamma …">
           <label>Bilde</label>
-          <input type="file" accept="image/*" id="itemPhoto">
+          <div class="photo-btns">
+            <label class="btn sec small"><input type="file" accept="image/*" capture="environment" id="itemCam" hidden>📷 Ta bilde</label>
+            <label class="btn sec small"><input type="file" accept="image/*" id="itemPhoto" hidden>🖼️ Velg fra bilder</label>
+          </div>
           <div class="photo-prev hidden" id="itemPrev"><img alt=""><button type="button" class="btn sec small" data-clear="item">Fjern bilde</button></div>
           <div class="actions">
             <button class="btn" type="submit" id="itemSubmit">Lagre</button>
@@ -219,6 +227,18 @@
       <div class="panel">
         <h2>Hele samlingen</h2>
         <div id="adminItems" class="list"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Bytt passord</h2>
+        <form id="pwForm" autocomplete="off">
+          <div class="row">
+            <div><label>Nytt passord</label><input type="password" id="newPw" autocomplete="new-password" minlength="4"></div>
+            <div><label>Gjenta nytt passord</label><input type="password" id="newPw2" autocomplete="new-password"></div>
+          </div>
+          <div id="newPwMsg" class="meta" style="margin-top:6px"></div>
+          <div class="actions"><button class="btn" type="submit">Bytt passord</button></div>
+        </form>
       </div>
 
       <div class="actions"><button class="btn sec" id="logout">Logg ut</button></div>
@@ -288,6 +308,7 @@ const demo = {
     const fail = e => ({ ok: false, error: e });
     switch (b.action) {
       case "checkPassword": return { ok: admin, error: admin ? "" : "Feil passord (demo: «demo»)" };
+      case "changePassword": return admin ? (this.PW = b.newPassword, { ok: true }) : fail("Feil passord");
       case "addGift": {
         const g = { ...b.gift, id: this.uid(), token: this.uid(), added: now };
         if (!g.name || !g.buyer) return fail("Mangler felt");
@@ -499,7 +520,7 @@ function compressImage(file) {
 }
 function bindPhoto(inputSel, prevSel, key) {
   $(inputSel).addEventListener("change", async e => {
-    const f = e.target.files[0]; if (!f) return;
+    const f = e.target.files[0]; e.target.value = ""; if (!f) return;
     try {
       photos[key] = await compressImage(f);
       if (key === "item") photos.itemKeep = false;
@@ -509,11 +530,13 @@ function bindPhoto(inputSel, prevSel, key) {
   });
 }
 bindPhoto("#giftPhoto", "#giftPrev", "gift");
+bindPhoto("#giftCam", "#giftPrev", "gift");
 bindPhoto("#itemPhoto", "#itemPrev", "item");
+bindPhoto("#itemCam", "#itemPrev", "item");
 document.addEventListener("click", e => {
   const k = e.target.dataset.clear; if (!k) return;
   photos[k] = ""; if (k === "item") photos.itemKeep = false;
-  $("#" + k + "Photo").value = ""; $("#" + k + "Prev").classList.add("hidden");
+  $("#" + k + "Photo").value = ""; $("#" + k + "Cam").value = ""; $("#" + k + "Prev").classList.add("hidden");
 });
 
 /* ---------- gift form ---------- */
@@ -561,6 +584,19 @@ $("#loginForm").addEventListener("submit", async e => {
   if (!res.ok) { $("#pwMsg").textContent = res.error || "Feil passord"; return; }
   $("#pwMsg").textContent = "";
   store.sset("nk_pw", pw); $("#pw").value = ""; renderAdmin(); toast("Logget inn");
+});
+$("#pwForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const a = $("#newPw").value, b = $("#newPw2").value, msg = $("#newPwMsg");
+  msg.style.color = "#9b1c22";
+  if (a.length < 4) return msg.textContent = "Minst 4 tegn.";
+  if (a !== b) return msg.textContent = "Passordene er ikke like.";
+  msg.style.color = ""; msg.textContent = "Lagrer …";
+  const res = await apiPost({ action: "changePassword", password: store.sget("nk_pw"), newPassword: a })
+    .catch(() => ({ ok: false, error: "Nettverksfeil" }));
+  if (!res.ok) { msg.style.color = "#9b1c22"; return msg.textContent = res.error; }
+  store.sset("nk_pw", a); e.target.reset();
+  msg.style.color = "#2f7a4b"; msg.textContent = "✓ Passordet er byttet.";
 });
 $("#logout").addEventListener("click", () => { store.sset("nk_pw", null); renderAdmin(); location.hash = "#samling"; });
 

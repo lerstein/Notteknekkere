@@ -10,10 +10,13 @@
  *       Who has access: Anyone
  *  5. Copy the Web app URL into API_URL in index.html.
  *
+ * Change password: admin page → «Bytt passord» (stored in Script Properties).
  * After code changes: Deploy → Manage deployments → Edit → Version: New version.
  */
 
-const ADMIN_PASSWORD = 'bytt-meg';   // <-- CHANGE THIS
+// Starting password. After first change from the admin page, the password
+// lives in Script Properties and this value is no longer used.
+const ADMIN_PASSWORD = 'bytt-meg';
 
 const SHEET_ITEMS = 'Samling';
 const SHEET_GIFTS = 'Gaver';
@@ -41,12 +44,20 @@ function doPost(e) {
   lock.waitLock(15000);
   try {
     const req = JSON.parse(e.postData.contents || '{}');
-    const isAdmin = req.password === ADMIN_PASSWORD;
+    const isAdmin = req.password === getPassword_();
     const needAdmin = () => { if (!isAdmin) throw new Error('Feil passord'); };
 
     switch (req.action) {
       case 'checkPassword':
         return json_({ ok: isAdmin, error: isAdmin ? '' : 'Feil passord' });
+
+      case 'changePassword': {
+        needAdmin();
+        const np = String(req.newPassword || '');
+        if (np.length < 4) throw new Error('Nytt passord må ha minst 4 tegn');
+        PropertiesService.getScriptProperties().setProperty('ADMIN_PASSWORD', np);
+        return json_({ ok: true });
+      }
 
       case 'addGift': {
         const g = clean_(req.gift, GIFT_HEADERS);
@@ -124,6 +135,10 @@ function doPost(e) {
 }
 
 // ---------- helpers ----------
+
+function getPassword_() {
+  return PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD') || ADMIN_PASSWORD;
+}
 
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
